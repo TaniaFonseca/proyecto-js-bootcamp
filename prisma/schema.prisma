@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+model usuarios {
+  id_usuario      Int       @id @default(autoincrement())
+  nombre          String    @db.VarChar(100)
+  email           String    @unique @db.VarChar(150)
+  password        String    @db.VarChar(255)
+  edad            Int?
+  peso_kg        Decimal? @db.Decimal(5, 2)
+  altura_cm      Decimal? @db.Decimal(5, 2)
+  fecha_registro  DateTime  @default(now())
+
+  rutinas         rutinas[]
+  cumplimientos   cumplimientos_rutinas[]
+  comentarios     comentarios[]
+}
+
+model ejercicios {
+  id_ejercicio     Int       @id @default(autoincrement())
+  nombre           String    @db.VarChar(100)
+  descripcion      String?
+  musculo_objetivo String?   @db.VarChar(100)
+
+  rutina_ejercicios rutina_ejercicios[]
+}
+
+model rutinas {
+  id_rutina      Int       @id @default(autoincrement())
+  id_usuario     Int
+  titulo         String    @db.VarChar(150)
+  descripcion    String?
+  fecha_creacion DateTime  @default(now())
+
+  usuario        usuarios  @relation(fields: [id_usuario], references: [id_usuario])
+  rutina_ejercicios rutina_ejercicios[]
+  cumplimientos   cumplimientos_rutinas[]
+  comentarios     comentarios[]
+}
+
+model rutina_ejercicios {
+  id_rutina    Int
+  id_ejercicio Int
+  series       Int?
+  repeticiones Int?
+
+  rutina    rutinas    @relation(fields: [id_rutina], references: [id_rutina])
+  ejercicio ejercicios @relation(fields: [id_ejercicio], references: [id_ejercicio])
+
+  @@id([id_rutina, id_ejercicio]) // Clave compuesta
+}
+
+model cumplimientos_rutinas {
+  id_cumplimiento Int      @id @default(autoincrement())
+  id_usuario      Int
+  id_rutina       Int
+  fecha           DateTime @db.Date
+  estado          String?  @db.VarChar(20)
+  notas           String?
+
+  usuario usuarios @relation(fields: [id_usuario], references: [id_usuario])
+  rutina  rutinas  @relation(fields: [id_rutina], references: [id_rutina])
+}
+
+model comentarios {
+  id_comentario Int      @id @default(autoincrement())
+  id_rutina     Int
+  id_usuario    Int
+  comentario    String?
+  fecha         DateTime @default(now())
+
+  usuario usuarios @relation(fields: [id_usuario], references: [id_usuario])
+  rutina  rutinas  @relation(fields: [id_rutina], references: [id_rutina])
+}
