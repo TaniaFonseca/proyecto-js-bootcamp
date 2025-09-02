@@ -20,6 +20,8 @@ connect()
 // Rutas
 app.use("/api", taskRoutes);
 
+connect();
+
 // Puerto desde variables de entorno o 4000 por defecto
 const PORT = process.env.PORT || 3001;
 
